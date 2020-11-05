@@ -33,9 +33,9 @@ class MultinomialNB_class:
 				ham_file_count += 1
 			if label == SPAM:
 				spam_file_count += 1
-		
-		class_log_prior[0] = Math.log(ham_file_count / labels.size)
-		class_log_prior[1] = Math.log(spam_file_count / labels.size)
+
+		class_log_prior[HAM] = Math.log(ham_file_count / labels.size)
+		class_log_prior[SPAM] = Math.log(spam_file_count / labels.size)
 
 		'''
 		calculate feature_log_prob
@@ -62,17 +62,18 @@ class MultinomialNB_class:
 		ham = np.zeros(most_common_word)
 		spam = np.zeros(most_common_word)
 		sum_of_ham = 0
-		sum_of_spam =0
+		sum_of_spam = 0
 		
 		row_index = 0
-		print(len(features[0]))
 		for row in features:
 			for col in range(most_common_word):
-				ham[col] += features[row_index][col]
-				spam[col] += features[row_index][col]
-				sum_of_ham += features[row_index][col]
-				sum_of_spam += features[row_index][col]
-		row_index += 1
+				if labels[row_index] == HAM:
+					ham[col] = features[row_index][col]
+					sum_of_ham += features[row_index][col]
+				else:
+					spam[col] = features[row_index][col]
+					sum_of_spam += features[row_index][col]
+			row_index += 1
 
 		for i in range(most_common_word):
 			ham[i] += smooth_alpha
@@ -82,15 +83,15 @@ class MultinomialNB_class:
 		sum_of_spam += most_common_word * smooth_alpha
 
 		for j in range(most_common_word):
-			feature_log_prob[0] = Math.log(ham[i] / sum_of_ham)
-			feature_log_prob[1] = Math.log(spam[i] / sum_of_spam)
+			feature_log_prob[HAM][j] = Math.log(ham[j] / sum_of_ham)
+			feature_log_prob[SPAM][j] = Math.log(spam[j] / sum_of_spam)
 
 	#multinomial naive bayes prediction
 	def MultinomialNB_predict(self, features):
 		classes = np.zeros(len(features))
 
-		ham_prob_total = 0.0
-		spam_prob_total = 0.0
+		ham_prob = 0.0
+		spam_prob = 0.0
 
 		'''
 		 nested loop over features with i and j
@@ -98,17 +99,20 @@ class MultinomialNB_class:
 		 add ham_prob and spam_prob with class_log_prior
 		 if ham_prob > spam_prob
 		 	HAM
-		 else SPAM
+		 else
+		 	SPAM
 		 return  classes
-		 '''
+		'''
 		i_index = 0
-		j_index = 0
 		for i in features:
-			for j in features[i_index]:
-				ham_prob_total = feature_log_prob[HAM][i_index]
-				spam_prob_total = feature_log_prob[SPAM][i_index]
-				j_index += 1
-			if ham_prob_total > spam_prob_total:
+			ham_prob = 0.0
+			spam_prob = 0.0
+			for j in range(most_common_word):
+				ham_prob += feature_log_prob[HAM][j] * features[i_index][j]
+				spam_prob += feature_log_prob[SPAM][j] * features[i_index][j]
+				ham_prob += class_log_prior[HAM]
+				spam_prob += class_log_prior[SPAM]
+			if ham_prob > spam_prob:
 				classes[i_index] = HAM
 			else:
 				classes[i_index] = SPAM

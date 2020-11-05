@@ -4,7 +4,6 @@ import numpy as np
 from SPFilter_MultinomialNB import MultinomialNB_class
 from SPFilter_BernoulliNB import BernoulliNB_class
 from SPFilter_GaussianNB import GaussianNB_class
-import re
 
 test_file_path = 'test-mails'
 train_file_path = 'train-mails'
@@ -35,8 +34,8 @@ def read_file(file):
         for line in f:
             line = line.strip()
             if line:
-                content += line + " "
-    return content.strip()
+                content += line
+    return content
 
 #count the total words
 def count_total_word(words):
@@ -74,19 +73,17 @@ def most_common():
         else:
             break
         index += 1
-    
-    print("Leaving most common...")
 
 #generate features according to commonMap
 def generate_feature(features, path, files):
-    print("Entering generate_features...")
     singleWordMap = {}
     file_index = 0
     for file in files:
         singleWordMap = {}
         content = read_file(path+'/'+file)
-        #content.replace("\n", "")
+        content.replace("\n", "")
         contents = content.split(" ")
+        #print(contents)
         count_word(contents, singleWordMap)
         
         for key1 in singleWordMap.keys():
@@ -96,16 +93,14 @@ def generate_feature(features, path, files):
                     features[file_index][common_index] = singleWordMap[key1]
                 common_index += 1
         file_index += 1
-    
-    print("Leaving generate_features...")
 
 
 #construct dictionary
 files = read_file_names(train_file_path)
 
 for i in range(len(files)):
-    content = read_file(train_file_path + '/' + files[i])
-    #content.replace("\n", "")
+    content = read_file(train_file_path+'/'+files[i])
+    content.replace("\n", "")
     contents = content.split(" ")
     count_total_word(contents)
 
@@ -124,8 +119,6 @@ train_labels = np.zeros(len(files))
 for i in range(len(files)//2, len(files)):
     train_labels[i] = 1
 
-print("past training labels...")
-
 #verify model
 #load test data
 files = read_file_names(test_file_path)
@@ -138,22 +131,20 @@ test_labels = np.zeros(len(files))
 for i in range(len(files)//2, len(files)):
     test_labels[i] = 1
 
-print("past test_labels")
 
-# Multinomial Naive Bayes start
-# print(train_labels)
-# train model
+#Multinomial Naive Bayes start
+#print(train_labels)
+#train model
 MultinomialNB = MultinomialNB_class()
 MultinomialNB.MultinomialNB(train_features, train_labels)
-# test model
+#test model
 classes = MultinomialNB.MultinomialNB_predict(test_features)
 error = 0
 for i in range(len(files)):
     if test_labels[i] == classes[i]:
         error += 1
-print("Error: " + str(error) + " / Label Count: " + str(len(test_labels)))
 print("Multinomial Naive Bayes: ", float(error)/float(len(test_labels)))
-# Multinomial Naive Bayes end
+#Multinomial Naive Bayes end
 
 
 # #Bernoulli Naive Bayes start
