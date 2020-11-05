@@ -68,10 +68,10 @@ class MultinomialNB_class:
 		for row in features:
 			for col in range(most_common_word):
 				if labels[row_index] == HAM:
-					ham[col] = features[row_index][col]
+					ham[col] += features[row_index][col]
 					sum_of_ham += features[row_index][col]
 				else:
-					spam[col] = features[row_index][col]
+					spam[col] += features[row_index][col]
 					sum_of_spam += features[row_index][col]
 			row_index += 1
 
@@ -116,6 +116,6 @@ class MultinomialNB_class:
 				classes[i_index] = HAM
 			else:
 				classes[i_index] = SPAM
-		i_index += 1
+			i_index += 1
 
 		return classes
